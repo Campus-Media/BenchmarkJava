@@ -45,6 +45,17 @@ public class BenchmarkTest00052 extends HttpServlet {
                 new org.owasp.benchmark.helpers.SeparateClassRequest(request);
         String param = scr.getTheValue("BenchmarkTest00052");
 
+        // Whitelist approach: only allow known safe stored procedures
+        java.util.Set<String> allowedProcedures = new java.util.HashSet<>();
+        allowedProcedures.add("BenchmarkProcedure1");
+        allowedProcedures.add("BenchmarkProcedure2");
+        allowedProcedures.add("BenchmarkProcedure3"); // Add all valid procedure names here
+
+        if (param == null || !allowedProcedures.contains(param)) {
+            response.getWriter().println("Invalid procedure name.");
+            return;
+        }
+
         String sql = "{call " + param + "}";
 
         try {
