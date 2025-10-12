@@ -65,12 +65,22 @@ public class BenchmarkTest00996 extends HttpServlet {
 
         String bar = new Test().doSomething(request, param);
 
-        String sql = "{call " + bar + "}";
+        // Use parameterized CallableStatement to prevent SQL injection
+        String sql = "{call verifyUserPassword(?, ?)}";
+        String[] parts = bar.split(",");
+        String user = "";
+        String pass = "";
+        if (parts.length == 2) {
+            user = parts[0].replaceAll("[^a-zA-Z0-9_]", "");
+            pass = parts[1]; // Allow all characters in password for flexibility
+        }
 
         try {
             java.sql.Connection connection =
                     org.owasp.benchmark.helpers.DatabaseHelper.getSqlConnection();
             java.sql.CallableStatement statement = connection.prepareCall(sql);
+            statement.setString(1, user);
+            statement.setString(2, pass);
             java.sql.ResultSet rs = statement.executeQuery();
             org.owasp.benchmark.helpers.DatabaseHelper.printResults(rs, sql, response);
 
