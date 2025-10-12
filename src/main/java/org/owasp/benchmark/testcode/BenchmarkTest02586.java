@@ -69,8 +69,10 @@ public class BenchmarkTest02586 extends HttpServlet {
 
         String bar = doSomething(request, param);
 
-        response.setHeader("X-XSS-Protection", "0");
-        response.getWriter().print(bar);
+        // Remove the line that disables X-XSS-Protection
+        // response.setHeader("X-XSS-Protection", "0");
+        // Sanitize output to prevent XSS
+        response.getWriter().print(escapeHtml(bar));
     } // end doPost
 
     private static String doSomething(HttpServletRequest request, String param)
@@ -98,5 +100,24 @@ public class BenchmarkTest02586 extends HttpServlet {
         }
 
         return bar;
+    }
+
+    // Simple HTML escaping to prevent XSS
+    private static String escapeHtml(String input) {
+        if (input == null) return null;
+        StringBuilder sb = new StringBuilder(input.length());
+        for (int i = 0; i < input.length(); i++) {
+            char c = input.charAt(i);
+            switch (c) {
+                case '<': sb.append("&lt;"); break;
+                case '>': sb.append("&gt;"); break;
+                case '"': sb.append("&quot;"); break;
+                case '\'': sb.append("&#x27;"); break;
+                case '&': sb.append("&amp;"); break;
+                case '/': sb.append("&#x2F;"); break;
+                default: sb.append(c);
+            }
+        }
+        return sb.toString();
     }
 }
