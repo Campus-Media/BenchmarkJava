@@ -62,6 +62,9 @@ public class BenchmarkTest00981 extends HttpServlet {
             }
         }
 
+        // Sanitize the input to prevent command injection
+        param = sanitizeForOSCommand(param);
+
         String bar = new Test().doSomething(request, param);
 
         String cmd = "";
@@ -96,6 +99,14 @@ public class BenchmarkTest00981 extends HttpServlet {
             return;
         }
     } // end doPost
+
+    // Sanitization method to remove dangerous characters for OS command injection
+    private String sanitizeForOSCommand(String input) {
+        if (input == null) return null;
+        // Remove common dangerous characters for command injection
+        // This is a simple allowlist: only allow alphanumerics, space, dot, dash, and underscore
+        return input.replaceAll("[^a-zA-Z0-9 ._-]", "");
+    }
 
     private class Test {
 
