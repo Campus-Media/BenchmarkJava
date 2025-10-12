@@ -69,14 +69,25 @@ public class BenchmarkTest02647 extends HttpServlet {
 
         String bar = doSomething(request, param);
 
-        String sql = "SELECT * from USERS where USERNAME='foo' and PASSWORD='" + bar + "'";
+        // Use PreparedStatement to prevent SQL Injection
+        String sql = "SELECT * from USERS where USERNAME='foo' and PASSWORD=?";
 
         try {
-            java.sql.Statement statement =
-                    org.owasp.benchmark.helpers.DatabaseHelper.getSqlStatement();
-            statement.addBatch(sql);
-            int[] counts = statement.executeBatch();
-            org.owasp.benchmark.helpers.DatabaseHelper.printResults(sql, counts, response);
+            java.sql.Connection connection = org.owasp.benchmark.helpers.DatabaseHelper.getSqlConnection();
+            java.sql.PreparedStatement statement = connection.prepareStatement(sql);
+            statement.setString(1, bar);
+            int[] counts = new int[1];
+            boolean hasResultSet = statement.execute();
+            if (hasResultSet) {
+                java.sql.ResultSet rs = statement.getResultSet();
+                org.owasp.benchmark.helpers.DatabaseHelper.printResults(sql, counts, response);
+                rs.close();
+            } else {
+                counts[0] = statement.getUpdateCount();
+                org.owasp.benchmark.helpers.DatabaseHelper.printResults(sql, counts, response);
+            }
+            statement.close();
+            connection.close();
         } catch (java.sql.SQLException e) {
             if (org.owasp.benchmark.helpers.DatabaseHelper.hideSQLErrors) {
                 response.getWriter().println("Error processing request.");
