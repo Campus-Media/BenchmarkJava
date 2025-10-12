@@ -69,6 +69,9 @@ public class BenchmarkTest01687 extends HttpServlet {
 
         String bar = new Test().doSomething(request, param);
 
+        // Sanitize bar to allow only safe directory/file names (alphanumeric, dash, underscore, dot)
+        bar = bar.replaceAll("[^a-zA-Z0-9._-]", "");
+
         String cmd = "";
         String a1 = "";
         String a2 = "";
