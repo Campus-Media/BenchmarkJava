@@ -47,10 +47,13 @@ public class BenchmarkTest02516 extends HttpServlet {
 
         String bar = doSomething(request, param);
 
+        // Sanitize the environment variable to prevent command injection
+        String safeBar = sanitizeEnvVar(bar);
+
         String cmd =
                 org.owasp.benchmark.helpers.Utils.getInsecureOSCommandString(
                         this.getClass().getClassLoader());
-        String[] argsEnv = {bar};
+        String[] argsEnv = {safeBar};
         Runtime r = Runtime.getRuntime();
         try {
             Process p = r.exec(cmd, argsEnv, new java.io.File(System.getProperty("user.dir")));
@@ -74,5 +77,12 @@ public class BenchmarkTest02516 extends HttpServlet {
         bar = (String) map74796.get("keyB-74796"); // get it back out
 
         return bar;
+    }
+
+    // Sanitize environment variable to prevent command injection
+    private static String sanitizeEnvVar(String input) {
+        if (input == null) return "";
+        // Only allow alphanumeric and a few safe characters
+        return input.replaceAll("[^a-zA-Z0-9_\-\.:]", "");
     }
 }
