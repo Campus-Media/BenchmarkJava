@@ -59,20 +59,21 @@ public class BenchmarkTest02358 extends HttpServlet {
 
         String bar = doSomething(request, param);
 
-        String sql = "SELECT * from USERS where USERNAME='foo' and PASSWORD='" + bar + "'";
+        // Use parameterized query to prevent SQL injection
+        String sql = "SELECT * from USERS where USERNAME=? and PASSWORD=?";
         try {
             java.util.List<java.util.Map<String, Object>> list =
-                    org.owasp.benchmark.helpers.DatabaseHelper.JDBCtemplate.queryForList(sql);
+                    org.owasp.benchmark.helpers.DatabaseHelper.JDBCtemplate.queryForList(sql, "foo", bar);
             response.getWriter().println("Your results are: <br>");
 
-            //		System.out.println("Your results are");
+            //      System.out.println("Your results are");
 
             for (Object o : list) {
                 response.getWriter()
                         .println(
                                 org.owasp.esapi.ESAPI.encoder().encodeForHTML(o.toString())
                                         + "<br>");
-                //			System.out.println(o.toString());
+                //          System.out.println(o.toString());
             }
         } catch (org.springframework.dao.EmptyResultDataAccessException e) {
             response.getWriter()
