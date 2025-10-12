@@ -47,6 +47,9 @@ public class BenchmarkTest02433 extends HttpServlet {
 
         String bar = doSomething(request, param);
 
+        // Sanitize user input to prevent command injection
+        bar = sanitizeInput(bar);
+
         String cmd = "";
         String a1 = "";
         String a2 = "";
@@ -88,5 +91,11 @@ public class BenchmarkTest02433 extends HttpServlet {
         String bar = thing.doSomething(param);
 
         return bar;
+    }
+
+    // Sanitize input to allow only alphanumeric, space, dash, underscore, and dot characters
+    private static String sanitizeInput(String input) {
+        if (input == null) return "";
+        return input.replaceAll("[^a-zA-Z0-9 _.-]", "");
     }
 }
