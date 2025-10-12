@@ -57,8 +57,15 @@ public class BenchmarkTest01610 extends HttpServlet {
         Runtime r = Runtime.getRuntime();
 
         try {
+            // FIX: Use exec with String[] to avoid command injection
+            String[] command;
+            if (cmd.isEmpty()) {
+                command = new String[] { bar };
+            } else {
+                command = new String[] { cmd.trim(), bar };
+            }
             Process p =
-                    r.exec(cmd + bar, argsEnv, new java.io.File(System.getProperty("user.dir")));
+                    r.exec(command, argsEnv, new java.io.File(System.getProperty("user.dir")));
             org.owasp.benchmark.helpers.Utils.printOSCommandResults(p, response);
         } catch (IOException e) {
             System.out.println("Problem executing cmdi - TestCase");
