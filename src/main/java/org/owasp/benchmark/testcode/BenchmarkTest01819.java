@@ -46,18 +46,29 @@ public class BenchmarkTest01819 extends HttpServlet {
 
         String bar = new Test().doSomething(request, param);
 
-        String sql = "INSERT INTO users (username, password) VALUES ('foo','" + bar + "')";
+        // Use PreparedStatement to prevent SQL Injection
+        String sql = "INSERT INTO users (username, password) VALUES ('foo', ?)";
 
+        java.sql.PreparedStatement pstmt = null;
+        java.sql.Connection connection = null;
         try {
-            java.sql.Statement statement =
-                    org.owasp.benchmark.helpers.DatabaseHelper.getSqlStatement();
-            int count = statement.executeUpdate(sql);
+            connection = org.owasp.benchmark.helpers.DatabaseHelper.getSqlConnection();
+            pstmt = connection.prepareStatement(sql);
+            pstmt.setString(1, bar);
+            int count = pstmt.executeUpdate();
             org.owasp.benchmark.helpers.DatabaseHelper.outputUpdateComplete(sql, response);
         } catch (java.sql.SQLException e) {
             if (org.owasp.benchmark.helpers.DatabaseHelper.hideSQLErrors) {
                 response.getWriter().println("Error processing request.");
                 return;
             } else throw new ServletException(e);
+        } finally {
+            if (pstmt != null) {
+                try { pstmt.close(); } catch (java.sql.SQLException e) { /* ignore */ }
+            }
+            if (connection != null) {
+                try { connection.close(); } catch (java.sql.SQLException e) { /* ignore */ }
+            }
         }
     } // end doPost
 
