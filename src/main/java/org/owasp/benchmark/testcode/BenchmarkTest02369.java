@@ -59,12 +59,14 @@ public class BenchmarkTest02369 extends HttpServlet {
 
         String bar = doSomething(request, param);
 
-        String sql = "INSERT INTO users (username, password) VALUES ('foo','" + bar + "')";
+        // Use try-with-resources for automatic resource management
+        String sql = "INSERT INTO users (username, password) VALUES (?, ?)";
 
-        try {
-            java.sql.Statement statement =
-                    org.owasp.benchmark.helpers.DatabaseHelper.getSqlStatement();
-            int count = statement.executeUpdate(sql, new int[] {1, 2});
+        try (java.sql.Connection connection = org.owasp.benchmark.helpers.DatabaseHelper.getSqlConnection();
+             java.sql.PreparedStatement pstmt = connection.prepareStatement(sql, new int[] {1, 2})) {
+            pstmt.setString(1, "foo");
+            pstmt.setString(2, bar);
+            int count = pstmt.executeUpdate();
             org.owasp.benchmark.helpers.DatabaseHelper.outputUpdateComplete(sql, response);
         } catch (java.sql.SQLException e) {
             if (org.owasp.benchmark.helpers.DatabaseHelper.hideSQLErrors) {
