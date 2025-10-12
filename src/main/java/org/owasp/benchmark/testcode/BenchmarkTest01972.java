@@ -50,18 +50,28 @@ public class BenchmarkTest01972 extends HttpServlet {
 
         String bar = doSomething(request, param);
 
-        String sql = "SELECT * from USERS where USERNAME='foo' and PASSWORD='" + bar + "'";
+        String sql = "SELECT * from USERS where USERNAME='foo' and PASSWORD=?";
 
+        java.sql.Connection connection = null;
+        java.sql.PreparedStatement statement = null;
         try {
-            java.sql.Statement statement =
-                    org.owasp.benchmark.helpers.DatabaseHelper.getSqlStatement();
-            statement.execute(sql, new String[] {"username", "password"});
+            connection = org.owasp.benchmark.helpers.DatabaseHelper.getSqlConnection();
+            statement = connection.prepareStatement(sql);
+            statement.setString(1, bar);
+            statement.execute();
             org.owasp.benchmark.helpers.DatabaseHelper.printResults(statement, sql, response);
         } catch (java.sql.SQLException e) {
             if (org.owasp.benchmark.helpers.DatabaseHelper.hideSQLErrors) {
                 response.getWriter().println("Error processing request.");
                 return;
             } else throw new ServletException(e);
+        } finally {
+            if (statement != null) {
+                try { statement.close(); } catch (java.sql.SQLException e) { /* ignore */ }
+            }
+            if (connection != null) {
+                try { connection.close(); } catch (java.sql.SQLException e) { /* ignore */ }
+            }
         }
     } // end doPost
 
