@@ -51,8 +51,15 @@ public class BenchmarkTest01077 extends HttpServlet {
         String bar = new Test().doSomething(request, param);
 
         try {
-            int randNumber = java.security.SecureRandom.getInstance("SHA1PRNG").nextInt(99);
-            String rememberMeKey = Integer.toString(randNumber);
+            // Use SecureRandom to generate a strong random key for rememberMeKey
+            java.security.SecureRandom secureRandom = new java.security.SecureRandom();
+            byte[] randomBytes = new byte[16]; // 128 bits of randomness
+            secureRandom.nextBytes(randomBytes);
+            StringBuilder sb = new StringBuilder();
+            for (byte b : randomBytes) {
+                sb.append(String.format("%02x", b));
+            }
+            String rememberMeKey = sb.toString();
 
             String user = "SafeInga";
             String fullClassName = this.getClass().getName();
@@ -97,8 +104,8 @@ public class BenchmarkTest01077 extends HttpServlet {
                                         + rememberMe.getValue()
                                         + "<br/>");
             }
-        } catch (java.security.NoSuchAlgorithmException e) {
-            System.out.println("Problem executing SecureRandom.nextInt(int) - TestCase");
+        } catch (Exception e) {
+            System.out.println("Problem executing SecureRandom for rememberMeKey - TestCase");
             throw new ServletException(e);
         }
         response.getWriter()
