@@ -47,6 +47,12 @@ public class BenchmarkTest01622 extends HttpServlet {
 
         String bar = new Test().doSomething(request, param);
 
+        // Only allow a strict pattern for stored procedure names: letters, numbers, and underscores
+        if (!bar.matches("^[a-zA-Z0-9_]+$")) {
+            response.getWriter().println("Invalid procedure name.");
+            return;
+        }
+
         String sql = "{call " + bar + "}";
 
         try {
