@@ -47,9 +47,10 @@ public class BenchmarkTest01590 extends HttpServlet {
 
         String bar = new Test().doSomething(request, param);
 
-        response.setHeader("X-XSS-Protection", "0");
-        Object[] obj = {"a", "b"};
-        response.getWriter().printf(bar, obj);
+        // Set X-XSS-Protection header to enable browser XSS protection
+        response.setHeader("X-XSS-Protection", "1; mode=block");
+        // Do not use untrusted input as a format string
+        response.getWriter().printf("%s", escapeHtml(bar));
     } // end doPost
 
     private class Test {
@@ -62,4 +63,23 @@ public class BenchmarkTest01590 extends HttpServlet {
             return bar;
         }
     } // end innerclass Test
+
+    // Simple HTML escaping to prevent XSS
+    private String escapeHtml(String input) {
+        if (input == null) return null;
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < input.length(); i++) {
+            char c = input.charAt(i);
+            switch (c) {
+                case '<': sb.append("&lt;"); break;
+                case '>': sb.append("&gt;"); break;
+                case '&': sb.append("&amp;"); break;
+                case '"': sb.append("&quot;"); break;
+                case '\'': sb.append("&#x27;"); break;
+                case '/': sb.append("&#x2F;"); break;
+                default: sb.append(c);
+            }
+        }
+        return sb.toString();
+    }
 } // end DataflowThruInnerClass
