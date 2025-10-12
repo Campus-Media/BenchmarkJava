@@ -69,19 +69,28 @@ public class BenchmarkTest01728 extends HttpServlet {
 
         String bar = new Test().doSomething(request, param);
 
-        String sql = "SELECT * from USERS where USERNAME='foo' and PASSWORD='" + bar + "'";
+        // Use PreparedStatement to prevent SQL Injection
+        String sql = "SELECT * from USERS where USERNAME='foo' and PASSWORD=?";
 
+        java.sql.Connection connection = null;
+        java.sql.PreparedStatement preparedStatement = null;
+        java.sql.ResultSet rs = null;
         try {
-            java.sql.Statement statement =
-                    org.owasp.benchmark.helpers.DatabaseHelper.getSqlStatement();
-            statement.addBatch(sql);
-            int[] counts = statement.executeBatch();
+            connection = org.owasp.benchmark.helpers.DatabaseHelper.getSqlConnection();
+            preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setString(1, bar);
+            rs = preparedStatement.executeQuery();
+            int[] counts = new int[] { rs != null && rs.next() ? 1 : 0 };
             org.owasp.benchmark.helpers.DatabaseHelper.printResults(sql, counts, response);
         } catch (java.sql.SQLException e) {
             if (org.owasp.benchmark.helpers.DatabaseHelper.hideSQLErrors) {
                 response.getWriter().println("Error processing request.");
                 return;
             } else throw new ServletException(e);
+        } finally {
+            try { if (rs != null) rs.close(); } catch (Exception e) { /* ignore */ }
+            try { if (preparedStatement != null) preparedStatement.close(); } catch (Exception e) { /* ignore */ }
+            try { if (connection != null) connection.close(); } catch (Exception e) { /* ignore */ }
         }
     } // end doPost
 
