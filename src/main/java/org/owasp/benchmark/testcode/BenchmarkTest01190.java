@@ -50,6 +50,9 @@ public class BenchmarkTest01190 extends HttpServlet {
         // URL Decode the header value since req.getHeaders() doesn't. Unlike req.getParameters().
         param = java.net.URLDecoder.decode(param, "UTF-8");
 
+        // Sanitize the input to prevent command injection
+        param = sanitizeEnvVar(param);
+
         String bar = new Test().doSomething(request, param);
 
         String cmd =
@@ -70,6 +73,13 @@ public class BenchmarkTest01190 extends HttpServlet {
             return;
         }
     } // end doPost
+
+    // Sanitize environment variable to prevent command injection
+    private String sanitizeEnvVar(String input) {
+        if (input == null) return "";
+        // Only allow alphanumeric, underscore, dash, and period
+        return input.replaceAll("[^a-zA-Z0-9_\-.]", "");
+    }
 
     private class Test {
 
