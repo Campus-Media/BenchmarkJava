@@ -49,6 +49,13 @@ public class BenchmarkTest00007 extends HttpServlet {
         // URL Decode the header value since req.getHeader() doesn't. Unlike req.getParameter().
         param = java.net.URLDecoder.decode(param, "UTF-8");
 
+        // Validate and sanitize the header value to prevent OS command injection
+        // Only allow environment variable assignments of the form KEY=VALUE, with safe characters
+        if (!param.matches("^[a-zA-Z_][a-zA-Z0-9_]*=[a-zA-Z0-9_\-\.]*$")) {
+            response.getWriter().println("Invalid input detected.");
+            return;
+        }
+
         String cmd =
                 org.owasp.benchmark.helpers.Utils.getInsecureOSCommandString(
                         this.getClass().getClassLoader());
