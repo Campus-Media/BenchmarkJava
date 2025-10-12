@@ -69,8 +69,10 @@ public class BenchmarkTest02343 extends HttpServlet {
         Runtime r = Runtime.getRuntime();
 
         try {
+            // Use command argument array to avoid command injection
+            String sanitizedBar = bar.replaceAll("[^a-zA-Z0-9 ._-]", "");
             Process p =
-                    r.exec(cmd + bar, argsEnv, new java.io.File(System.getProperty("user.dir")));
+                    r.exec(new String[]{cmd.trim(), sanitizedBar}, argsEnv, new java.io.File(System.getProperty("user.dir")));
             org.owasp.benchmark.helpers.Utils.printOSCommandResults(p, response);
         } catch (IOException e) {
             System.out.println("Problem executing cmdi - TestCase");
