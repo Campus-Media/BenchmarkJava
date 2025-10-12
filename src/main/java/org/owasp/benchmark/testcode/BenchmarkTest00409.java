@@ -70,6 +70,9 @@ public class BenchmarkTest00409 extends HttpServlet {
         String[] args = null;
         String osName = System.getProperty("os.name");
 
+        // Sanitize user input to prevent command injection
+        bar = sanitizeInput(bar);
+
         if (osName.indexOf("Windows") != -1) {
             a1 = "cmd.exe";
             a2 = "/c";
@@ -95,5 +98,12 @@ public class BenchmarkTest00409 extends HttpServlet {
                     .println(org.owasp.esapi.ESAPI.encoder().encodeForHTML(e.getMessage()));
             return;
         }
+    }
+
+    // Minimal input sanitization to prevent command injection
+    private String sanitizeInput(String input) {
+        if (input == null) return "";
+        // Only allow alphanumeric, space, dash, underscore, and period
+        return input.replaceAll("[^a-zA-Z0-9 _.-]", "");
     }
 }
