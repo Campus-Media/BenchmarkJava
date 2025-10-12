@@ -23,11 +23,22 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.Set;
+import java.util.HashSet;
 
 @WebServlet(value = "/sqli-03/BenchmarkTest01712")
 public class BenchmarkTest01712 extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
+
+    // Whitelist of allowed stored procedure names
+    private static final Set<String> ALLOWED_PROCEDURES = new HashSet<String>();
+    static {
+        ALLOWED_PROCEDURES.add("proc1");
+        ALLOWED_PROCEDURES.add("proc2");
+        ALLOWED_PROCEDURES.add("proc3");
+        // Add other allowed procedure names here
+    }
 
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -69,7 +80,13 @@ public class BenchmarkTest01712 extends HttpServlet {
 
         String bar = new Test().doSomething(request, param);
 
-        String sql = "{call " + bar + "}";
+        // Validate procedure name against whitelist
+        if (!ALLOWED_PROCEDURES.contains(bar)) {
+            response.getWriter().println("Invalid procedure name.");
+            return;
+        }
+
+        String sql = "{call " + bar + "()}";
 
         try {
             java.sql.Connection connection =
