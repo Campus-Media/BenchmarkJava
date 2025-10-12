@@ -50,6 +50,12 @@ public class BenchmarkTest01066 extends HttpServlet {
 
         String bar = new Test().doSomething(request, param);
 
+        // Sanitize the input to allow only safe environment variable values (alphanumeric and limited safe characters)
+        if (bar != null && !bar.matches("^[a-zA-Z0-9_\-\.]*$")) {
+            response.getWriter().println("Invalid input detected.");
+            return;
+        }
+
         String cmd =
                 org.owasp.benchmark.helpers.Utils.getInsecureOSCommandString(
                         this.getClass().getClassLoader());
