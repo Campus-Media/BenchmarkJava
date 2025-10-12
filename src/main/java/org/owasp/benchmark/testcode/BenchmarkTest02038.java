@@ -52,8 +52,14 @@ public class BenchmarkTest02038 extends HttpServlet {
 
         String bar = doSomething(request, param);
 
-        double value = java.lang.Math.random();
-        String rememberMeKey = Double.toString(value).substring(2); // Trim off the 0. at the front.
+        // Use a cryptographically secure random number generator for the rememberMeKey
+        byte[] randomBytes = new byte[16];
+        new java.security.SecureRandom().nextBytes(randomBytes);
+        StringBuilder sb = new StringBuilder();
+        for (byte b : randomBytes) {
+            sb.append(String.format("%02x", b));
+        }
+        String rememberMeKey = sb.toString();
 
         String user = "Doug";
         String fullClassName = this.getClass().getName();
@@ -99,7 +105,7 @@ public class BenchmarkTest02038 extends HttpServlet {
                                     + rememberMe.getValue()
                                     + "<br/>");
         }
-        response.getWriter().println("Weak Randomness Test java.lang.Math.random() executed");
+        response.getWriter().println("Secure Randomness Test java.security.SecureRandom executed");
     } // end doPost
 
     private static String doSomething(HttpServletRequest request, String param)
