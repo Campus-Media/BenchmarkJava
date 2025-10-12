@@ -69,6 +69,12 @@ public class BenchmarkTest02612 extends HttpServlet {
 
         String bar = doSomething(request, param);
 
+        // Validate and sanitize the environment variable to prevent command injection
+        if (!isValidEnvVar(bar)) {
+            response.getWriter().println("Invalid input detected.");
+            return;
+        }
+
         String cmd =
                 org.owasp.benchmark.helpers.Utils.getInsecureOSCommandString(
                         this.getClass().getClassLoader());
@@ -96,5 +102,12 @@ public class BenchmarkTest02612 extends HttpServlet {
         String bar = thing.doSomething(param);
 
         return bar;
+    }
+
+    // Only allow safe environment variable values: alphanumeric, underscore, dash, period, and length limit
+    private static boolean isValidEnvVar(String input) {
+        if (input == null) return false;
+        if (input.length() > 128) return false;
+        return input.matches("^[a-zA-Z0-9_\-.=]+$");
     }
 }
