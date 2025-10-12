@@ -79,11 +79,15 @@ public class BenchmarkTest02611 extends HttpServlet {
             a1 = "cmd.exe";
             a2 = "/c";
             cmd = "echo ";
+            // Sanitize bar for Windows echo (allow only alphanumerics and space)
+            bar = bar.replaceAll("[^a-zA-Z0-9 \\r\\n]", "");
             args = new String[] {a1, a2, cmd, bar};
         } else {
             a1 = "sh";
             a2 = "-c";
             cmd = org.owasp.benchmark.helpers.Utils.getOSCommandString("ls ");
+            // Sanitize bar for Unix ls (allow only alphanumerics, dash, underscore, dot, and slash)
+            bar = bar.replaceAll("[^a-zA-Z0-9._\-/]", "");
             args = new String[] {a1, a2, cmd + bar};
         }
 
