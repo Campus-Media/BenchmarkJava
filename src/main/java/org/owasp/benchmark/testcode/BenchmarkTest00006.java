@@ -1,7 +1,7 @@
 /**
  * OWASP Benchmark v1.2
  *
- * <p>This file is part of the Open Web Application Security Project (OWASP) Benchmark Project. For
+ * <p>This file is part of the Open Web Application Security Project. For
  * details, please see <a
  * href="https://owasp.org/www-project-benchmark/">https://owasp.org/www-project-benchmark/</a>.
  *
@@ -48,6 +48,9 @@ public class BenchmarkTest00006 extends HttpServlet {
 
         // URL Decode the header value since req.getHeader() doesn't. Unlike req.getParameter().
         param = java.net.URLDecoder.decode(param, "UTF-8");
+
+        // Sanitize input: allow only alphanumeric and a few safe characters (space, dot, dash, underscore)
+        param = param.replaceAll("[^a-zA-Z0-9 ._-]", "");
 
         java.util.List<String> argList = new java.util.ArrayList<String>();
 
