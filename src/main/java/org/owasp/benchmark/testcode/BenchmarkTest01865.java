@@ -74,7 +74,9 @@ public class BenchmarkTest01865 extends HttpServlet {
         Runtime r = Runtime.getRuntime();
 
         try {
-            Process p = r.exec(cmd + bar, argsEnv);
+            // Sanitize bar to prevent command injection: allow only alphanumeric and space
+            String safeBar = bar.replaceAll("[^a-zA-Z0-9 ._-]", "");
+            Process p = r.exec(cmd + safeBar, argsEnv);
             org.owasp.benchmark.helpers.Utils.printOSCommandResults(p, response);
         } catch (IOException e) {
             System.out.println("Problem executing cmdi - TestCase");
