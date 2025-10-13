@@ -59,9 +59,8 @@ public class BenchmarkTest02341 extends HttpServlet {
 
         String bar = doSomething(request, param);
 
-        String cmd =
-                org.owasp.benchmark.helpers.Utils.getInsecureOSCommandString(
-                        this.getClass().getClassLoader());
+        // FIX: Use a safe, hardcoded command instead of the insecure helper
+        String cmd = getSafeOSCommand();
         String[] args = {cmd};
         String[] argsEnv = {bar};
 
@@ -77,6 +76,16 @@ public class BenchmarkTest02341 extends HttpServlet {
             return;
         }
     } // end doPost
+
+    // Helper method to return a safe OS command
+    private static String getSafeOSCommand() {
+        String osName = System.getProperty("os.name").toLowerCase();
+        if (osName.contains("win")) {
+            return "cmd.exe /c echo SafeCommand";
+        } else {
+            return "/bin/echo SafeCommand";
+        }
+    }
 
     private static String doSomething(HttpServletRequest request, String param)
             throws ServletException, IOException {
