@@ -62,18 +62,21 @@ public class BenchmarkTest02292 extends HttpServlet {
         // Code based on example from:
         // http://examples.javacodegeeks.com/core-java/crypto/encrypt-decrypt-file-stream-with-des/
         // 8-byte initialization vector
-        //	    byte[] iv = {
-        //	    	(byte)0xB2, (byte)0x12, (byte)0xD5, (byte)0xB2,
-        //	    	(byte)0x44, (byte)0x21, (byte)0xC3, (byte)0xC3033
-        //	    };
+        //     byte[] iv = {
+        //      (byte)0xB2, (byte)0x12, (byte)0xD5, (byte)0xB2,
+        //      (byte)0x44, (byte)0x21, (byte)0xC3, (byte)0xC3033
+        //     };
         java.security.SecureRandom random = new java.security.SecureRandom();
-        byte[] iv = random.generateSeed(8); // DES requires 8 byte keys
+        byte[] iv = new byte[16]; // AES requires 16 byte IV
+        random.nextBytes(iv);
 
         try {
             javax.crypto.Cipher c =
-                    javax.crypto.Cipher.getInstance("DES/CBC/PKCS5Padding", "SunJCE");
+                    javax.crypto.Cipher.getInstance("AES/CBC/PKCS5Padding");
             // Prepare the cipher to encrypt
-            javax.crypto.SecretKey key = javax.crypto.KeyGenerator.getInstance("DES").generateKey();
+            javax.crypto.KeyGenerator keyGen = javax.crypto.KeyGenerator.getInstance("AES");
+            keyGen.init(128); // 128-bit AES key
+            javax.crypto.SecretKey key = keyGen.generateKey();
             java.security.spec.AlgorithmParameterSpec paramSpec =
                     new javax.crypto.spec.IvParameterSpec(iv);
             c.init(javax.crypto.Cipher.ENCRYPT_MODE, key, paramSpec);
