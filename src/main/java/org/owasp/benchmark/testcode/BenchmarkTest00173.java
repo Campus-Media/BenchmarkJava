@@ -48,6 +48,12 @@ public class BenchmarkTest00173 extends HttpServlet {
         // URL Decode the header value since req.getHeader() doesn't. Unlike req.getParameter().
         param = java.net.URLDecoder.decode(param, "UTF-8");
 
+        // Sanitize the input to prevent command injection
+        if (!isSafeEnvVar(param)) {
+            response.getWriter().println("Invalid input detected.");
+            return;
+        }
+
         String bar = "safe!";
         java.util.HashMap<String, Object> map68097 = new java.util.HashMap<String, Object>();
         map68097.put("keyA-68097", "a-Value"); // put some stuff in the collection
@@ -71,5 +77,12 @@ public class BenchmarkTest00173 extends HttpServlet {
                     .println(org.owasp.esapi.ESAPI.encoder().encodeForHTML(e.getMessage()));
             return;
         }
+    }
+
+    // Helper method to validate environment variable value
+    private boolean isSafeEnvVar(String input) {
+        // Only allow alphanumeric, underscore, dash, and period characters
+        if (input == null) return false;
+        return input.matches("^[a-zA-Z0-9_.-]*$");
     }
 }
