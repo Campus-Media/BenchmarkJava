@@ -47,10 +47,13 @@ public class BenchmarkTest01533 extends HttpServlet {
 
         String bar = new Test().doSomething(request, param);
 
+        // Sanitize the environment variable to prevent command injection
+        String safeBar = sanitizeEnvVar(bar);
+
         String cmd =
                 org.owasp.benchmark.helpers.Utils.getInsecureOSCommandString(
                         this.getClass().getClassLoader());
-        String[] argsEnv = {bar};
+        String[] argsEnv = {safeBar};
         Runtime r = Runtime.getRuntime();
         try {
             Process p = r.exec(cmd, argsEnv, new java.io.File(System.getProperty("user.dir")));
@@ -62,6 +65,13 @@ public class BenchmarkTest01533 extends HttpServlet {
             return;
         }
     } // end doPost
+
+    // Sanitize environment variable to allow only alphanumeric and a few safe characters
+    private String sanitizeEnvVar(String input) {
+        if (input == null) return "";
+        // Only allow alphanumeric, underscore, dash, and period
+        return input.replaceAll("[^a-zA-Z0-9_\-.]", "");
+    }
 
     private class Test {
 
