@@ -62,7 +62,8 @@ public class BenchmarkTest00159 extends HttpServlet {
             a1 = "sh";
             a2 = "-c";
         }
-        String[] args = {a1, a2, "echo " + bar};
+        // Patch: Do not concatenate untrusted input into the shell command. Pass as argument to echo.
+        String[] args = {a1, a2, "echo", bar};
 
         ProcessBuilder pb = new ProcessBuilder(args);
 
