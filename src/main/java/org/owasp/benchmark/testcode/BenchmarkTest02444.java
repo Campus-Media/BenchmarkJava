@@ -48,8 +48,15 @@ public class BenchmarkTest02444 extends HttpServlet {
         String bar = doSomething(request, param);
 
         try {
-            int randNumber = java.security.SecureRandom.getInstance("SHA1PRNG").nextInt(99);
-            String rememberMeKey = Integer.toString(randNumber);
+            // Generate a strong random token with sufficient entropy
+            java.security.SecureRandom secureRandom = java.security.SecureRandom.getInstance("SHA1PRNG");
+            byte[] tokenBytes = new byte[16]; // 128 bits of entropy
+            secureRandom.nextBytes(tokenBytes);
+            StringBuilder sb = new StringBuilder();
+            for (byte b : tokenBytes) {
+                sb.append(String.format("%02x", b));
+            }
+            String rememberMeKey = sb.toString();
 
             String user = "SafeInga";
             String fullClassName = this.getClass().getName();
